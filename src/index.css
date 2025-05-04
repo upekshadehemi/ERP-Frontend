@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+:root {
+    font-family: 'Times New Roman', Times, serif, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.4;
+    font-weight: 350;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
