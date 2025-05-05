@@ -18,6 +18,10 @@ function Build() {
   const [filteredBuildings, setFilteredBuildings] = useState<buildings[]>(Buildings);
   const [editingBuildingId, setEditingBuildingId] = useState<number | null>(null);
   const [editedBuilding, setEditedBuilding] = useState<buildings | null>(null);
+  const [showMessage, setShowMessage] = useState(false); // State for message box
+  const[editMessage,setEditMessage]=useState(false);//state for edit message box
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false); // State for delete confirmation
+  const [buildingToDelete, setBuildingToDelete] = useState<number | null>(null); // Track building to delete
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -62,12 +66,17 @@ function Build() {
       setFilteredBuildings([...Buildings, newBuilding]); // Update filtered list
       setNewbuildName('');
       setNewDescription('');
+      setShowMessage(true); // Show the message box
+
+      // Hide the message box after 3 seconds
+      setTimeout(() => setShowMessage(false), 3000);
     }
   };
 
   const handleEdit = (building: buildings) => {
     setEditingBuildingId(building.id);
     setEditedBuilding({ ...building }); // Create a copy for editing
+
   };
 
   const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,6 +95,11 @@ function Build() {
       setFilteredBuildings(updatedBuildings); // Update filtered list
       setEditingBuildingId(null);
       setEditedBuilding(null);
+      setEditMessage(true); //show the edit message box
+
+      
+      // Hide the message box after 3 seconds
+      setTimeout(() => setEditMessage(false), 3000);
     }
   };
 
@@ -94,6 +108,27 @@ function Build() {
     setBuildings(updatedBuildings);
     setFilteredBuildings(updatedBuildings); // Update filtered list
   };
+
+  const handleDeleteClick = (id: number) => {
+    setBuildingToDelete(id); // Set the building to delete
+    setShowDeleteConfirmation(true); // Show the confirmation box
+  };
+
+  const confirmDelete = () => {
+    if (buildingToDelete !== null) {
+      const updatedBuildings = Buildings.filter((building) => building.id !== buildingToDelete);
+      setBuildings(updatedBuildings);
+      setFilteredBuildings(updatedBuildings); // Update filtered list
+      setShowDeleteConfirmation(false); // Hide the confirmation box
+      setBuildingToDelete(null); // Reset the building to delete
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirmation(false); // Hide the confirmation box
+    setBuildingToDelete(null); // Reset the building to delete
+  };
+
 
   return (
     <div className="ml-[20%] mt-[10%] h-screen">
@@ -129,6 +164,32 @@ function Build() {
         </div>
       </div>
 
+     
+      {/* ...existing code... */}
+
+      {/* Delete Confirmation Box */}
+      {showDeleteConfirmation && (
+        <div className="fixed inset-0 flex items-center justify-center">
+          <div className="bg-blue-900 p-6 rounded shadow-lg text-white">
+            <p className="mb-4">Are you sure you want to delete this?</p>
+            <div className="flex justify-end">
+              <button
+                onClick={confirmDelete}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mr-2"
+              >
+                Yes
+              </button>
+              <button
+                onClick={cancelDelete}
+                className="bg-white text-black px-4 py-2 rounded hover:bg-gray-400"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Add New Norm Group Section */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-2">Add New Norm Group</h2>
@@ -157,10 +218,23 @@ function Build() {
           </button>
         </div>
       </div>
+       {/* Message Box */}
+       {showMessage && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+           added successfully!
+        </div>
+      )}
+
 
       {/* Norm Group List Section */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Norm Group List</h2>
+         {/* Edit Success Message */}
+  {editMessage && (
+    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+      Update successful!
+    </div>
+  )}
         <table className="w-full border">
           <thead className="bg-gray-200">
             <tr>
@@ -199,7 +273,9 @@ function Build() {
                       >
                         Update
                       </button>
+                      
                     </td>
+                    
                   </>
                 ) : (
                   <>
@@ -213,7 +289,7 @@ function Build() {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(building.id)}
+                        onClick={() => handleDeleteClick(building.id)}
                         className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 ml-2"
                       >
                         Delete
