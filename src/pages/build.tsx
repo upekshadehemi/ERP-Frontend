@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
 interface buildings {
   id: number; // Add an ID for tracking items
@@ -10,6 +11,10 @@ function Build() {
   const [Buildings, setBuildings] = useState<buildings[]>([
     { id: 1, name: 'Building A', description: 'Description A' },
   ]);
+
+  useEffect(() => {
+    console.log("Buildings", Buildings);
+  }, [Buildings]);
 
   const [newbuildName, setNewbuildName] = useState('');
   const [newDescription, setNewDescription] = useState('');
@@ -55,7 +60,7 @@ function Build() {
     setFilteredBuildings(filtered);
   };
 
-  const handleAddItem = () => {
+  const handleAddItem = async () => {
     if (newbuildName.trim() && newDescription.trim()) {
       const newBuilding: buildings = {
         id: Date.now(), // Generate a unique ID
@@ -67,6 +72,25 @@ function Build() {
       setNewbuildName('');
       setNewDescription('');
       setShowMessage(true); // Show the message box
+
+      try {
+        const response = await axios.post(
+          `http://localhost:3000/api/normgroup/add`,
+          {
+            Buildings,
+          }
+        );
+
+        if (response.data.success) {
+          // console.log("response.data.data", response.data.data);
+
+        } else {
+          // form.reset({});
+          
+        }
+      } catch (error) {
+        console.error("Error fetching person:", error);
+      }
 
       // Hide the message box after 3 seconds
       setTimeout(() => setShowMessage(false), 3000);
