@@ -1,199 +1,135 @@
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
-interface buildings {
+interface road {
   id: number; // Add an ID for tracking items
   name: string;
   description: string;
 }
 
-function Build() {
-  // const [Buildings, setBuildings] = useState<buildings[]>([
-  //   { id: 1, name: 'Building A', description: 'Description A' },
-  // ]);
+function Roads() {
 
-  const [Buildings, setBuildings] = useState<buildings[]>([]);
-
-  useEffect(() => {
-    console.log("Buildings", Buildings);
-  }, [Buildings]);
-
-  const [newbuildName, setNewbuildName] = useState('');
-  const [newDescription, setNewDescription] = useState('');
-  const [searchQuery, setSearchQuery] = useState(''); // State for search query
-  const [searchType, setSearchType] = useState('name'); // State for search type (id or name)
-  const [filteredBuildings, setFilteredBuildings] = useState<buildings[]>(Buildings);
-  const [editingBuildingId, setEditingBuildingId] = useState<number | null>(null);
-  const [editedBuilding, setEditedBuilding] = useState<buildings | null>(null);
-  const [showMessage, setShowMessage] = useState(false); // State for message box
-  const[editMessage,setEditMessage]=useState(false);//state for edit message box
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false); // State for delete confirmation
-  const [buildingToDelete, setBuildingToDelete] = useState<number | null>(null); // Track building to delete
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    switch (name) {
-      case 'newbuildName':
-        setNewbuildName(value);
-        break;
-      case 'newDescription':
-        setNewDescription(value);
-        break;
-      case 'searchQuery': // Handle search query input
-        setSearchQuery(value);
-        break;
-      case 'searchType': // Handle search type selection
-        setSearchType(value);
-        break;
-      default:
-        break;
-    }
-  };
-
-  const handleSearch = async () => {
-  try {
-    const response = await axios.get('http://localhost:3000/api/normgroup/:aid', {
-      params: {
-        [searchType]: searchQuery
-      },
-      withCredentials: true
+    const [Road, setRoad] = useState<road[]>([]);
+    
+      useEffect(() => {
+        console.log("Road", Road);
+      }, [Road]);
+      const [newroadName, setNewroadName] = useState('');
+      const [newDescription, setNewDescription] = useState('');
+      const [searchQuery, setSearchQuery] = useState(''); // State for search query
+      const [searchType, setSearchType] = useState('name'); // State for search type (id or name)
+      const [filteredroad, setFilteredroad] = useState<road[]>(Road);
+      const [editingroadId, setEditingroadId] = useState<number | null>(null);
+      const [editedroad, setEditedroad] = useState<road | null>(null);
+      const [showMessage, setShowMessage] = useState(false); // State for message box
+      const[editMessage,setEditMessage]=useState(false);//state for edit message box
+      const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false); // State for delete confirmation
+      const [roadToDelete, setroadToDelete] = useState<number | null>(null); // Track building to delete
+    
+       const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+          const { name, value } = e.target;
+          switch (name) {
+            case 'newroadname':
+              setNewroadName(value);
+              break;
+            case 'newDescription':
+              setNewDescription(value);
+              break;
+            case 'searchQuery': // Handle search query input
+              setSearchQuery(value);
+              break;
+            case 'searchType': // Handle search type selection
+              setSearchType(value);
+              break;
+            default:
+              break;
+          }
+        };
+        const handleSearch = () => {
+    const filtered = Road.filter((roads) => {
+      if (searchType === 'name') {
+        return roads.name.toLowerCase().includes(searchQuery.toLowerCase());
+      } else if (searchType === 'id') {
+        return roads.id.toString().includes(searchQuery);
+      }
+      return false;
     });
-    if (response.data.success) {
-      setFilteredBuildings(response.data.data);
-    } else {
-      setFilteredBuildings([]);
-    }
-  } catch (error) {
-    console.error('Error searching normgroups:', error);
-    setFilteredBuildings([]);
-  }
-};
-  const handleAddItem = async () => {
-    if (newbuildName.trim() && newDescription.trim()) {
-      const newBuilding: buildings = {
+    setFilteredroad(filtered);
+  };
+   const handleAddItem = async () => {
+    if (newroadName.trim() && newDescription.trim()) {
+      const newroad: road = {
         id: Date.now(), // Generate a unique ID
-        name: newbuildName.trim(),
+        name: newroadName.trim(),
         description: newDescription.trim(),
       };
-      setBuildings([...Buildings, newBuilding]);
-      setFilteredBuildings([...Buildings, newBuilding]); // Update filtered list
-      setNewbuildName('');
+      setRoad([...Road, newroad]);
+      setFilteredroad([...Road, newroad]); // Update filtered list
+      setNewroadName('');
       setNewDescription('');
       setShowMessage(true); // Show the message box
 
-      try {
-        console.log("object", newBuilding)
-       const response = await axios.post(
-          'http://localhost:3000/api/normgroup/add',
-          { newBuilding },
-          { withCredentials: true }
-        );
-
-        if (response.data.success) {
-          // console.log("response.data.data", response.data.data);
-
-        } else {
-          // form.reset({});
-          
-        }
-      } catch (error) {
-        console.error("Error fetching person:", error);
-      }
-
+     
       // Hide the message box after 3 seconds
       setTimeout(() => setShowMessage(false), 3000);
     }
   };
-
-  const handleEdit = (building: buildings) => {
-    setEditingBuildingId(building.id);
-    setEditedBuilding({ ...building }); // Create a copy for editing
+   const handleEdit = (roads: road) => {
+     setEditingroadId(roads.id);
+    setEditedroad({ ...roads }); // Create a copy for editing
 
   };
 
   const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (editedBuilding) {
-      setEditedBuilding({ ...editedBuilding, [name]: value });
+    if (editedroad) {
+      setEditedroad({ ...editedroad, [name]: value });
     }
   };
 
   const handleUpdate = async ()  => {
-    if (editedBuilding) {
-      const updatedBuildings = Buildings.map((building) =>
-        building.id === editedBuilding.id ? { ...editedBuilding } : building
+    if (editedroad) {
+      const updatedroad = Road.map((roads) =>
+        roads.id === editedroad.id ? { ...editedroad} : roads
       );
-      setBuildings(updatedBuildings);
-      setFilteredBuildings(updatedBuildings); // Update filtered list
-      setEditingBuildingId(null);
-      setEditedBuilding(null);
+      setRoad(updatedroad);
+      setFilteredroad(updatedroad); // Update filtered list
+      setEditingroadId(null);
+      setEditedroad(null);
       setEditMessage(true); //show the edit message box
- try {
-        console.log("object", updatedBuildings)
-        console.log("editingBuildingId", editingBuildingId)
-       const response = await axios.post(
-          `http://localhost:3000/api/normgroup/${editingBuildingId}`,
-          { updatedBuildings },
-          { withCredentials: true }
-        );
-
-        if (response.data.success) {
-          // console.log("response.data.data", response.data.data);
-
-        } else {
-          // form.reset({});
-          
-        }
-      } catch (error) {
-        console.error("Error fetching person:", error);
-      }
+ 
       
       // Hide the message box after 3 seconds
       setTimeout(() => setEditMessage(false), 3000);
     }
   };
+   const handleDelete = (id: number) => {
+    const updatedroad = Road.filter((roads) => roads.id !== id);
+    setRoad(updatedroad);
+    setFilteredroad(updatedroad); // Update filtered list
+  };
 
-   const handleDeleteClick = (id: number) => {
-    setBuildingToDelete(id); // Set the building to delete
+  const handleDeleteClick = (id: number) => {
+    setroadToDelete(id); // Set the building to delete
     setShowDeleteConfirmation(true); // Show the confirmation box
   };
 
   const confirmDelete = () => {
-    if (buildingToDelete !== null) {
-      const updatedBuildings = Buildings.filter((building) => building.id !== buildingToDelete);
-      setBuildings(updatedBuildings);
-      setFilteredBuildings(updatedBuildings); // Update filtered list
+    if (roadToDelete !== null) {
+      const updatedroad = Road.filter((roads) => roads.id !== roadToDelete);
+      setRoad(updatedroad);
+      setFilteredroad(updatedroad); // Update filtered list
       setShowDeleteConfirmation(false); // Hide the confirmation box
-      setBuildingToDelete(null); // Reset the building to delete
+      setroadToDelete(null); // Reset the building to delete
     }
   };
 
   const cancelDelete = () => {
     setShowDeleteConfirmation(false); // Hide the confirmation box
-    setBuildingToDelete(null); // Reset the building to delete
+    setroadToDelete(null); // Reset the building to delete
   };
-
-  // ...existing code...
-useEffect(() => {
-  // Fetch normgroups from backend
-  const fetchBuildings = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/api/normgroup/all', { withCredentials: true });
-      if (response.data.success) {
-        setBuildings(response.data.data);
-        setFilteredBuildings(response.data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching normgroups:', error);
-    }
-  };
-  fetchBuildings();
-}, []);
-// ...existing code...
-
 
   return (
-    <div className="ml-[20%] mt-[10%] h-screen">
+    <div  className="ml-[20%] mt-[10%] h-screen">
       <h1 className="text-3xl font-bold mb-6">Norm Group</h1>
 
       {/* Search Section */}
@@ -225,11 +161,7 @@ useEffect(() => {
           </button>
         </div>
       </div>
-
-     
-      {/* ...existing code... */}
-
-      {/* Delete Confirmation Box */}
+  {/* Delete Confirmation Box */}
       {showDeleteConfirmation && (
         <div className="fixed inset-0 flex items-center justify-center">
           <div className="bg-blue-900 p-6 rounded shadow-lg text-white">
@@ -258,9 +190,9 @@ useEffect(() => {
         <div className="flex flex-col md:flex-row gap-4">
           <input
             type="text"
-            name="newbuildName"
-            placeholder="Building Name"
-            value={newbuildName}
+            name="newroadName"
+            placeholder="road name"
+            value={newroadName}
             onChange={handleInputChange}
             className="border p-2 rounded w-40% md:w-1/3"
           />
@@ -286,8 +218,6 @@ useEffect(() => {
            added successfully!
         </div>
       )}
-
-
       {/* Norm Group List Section */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Norm Group List</h2>
@@ -306,15 +236,15 @@ useEffect(() => {
             </tr>
           </thead>
           <tbody>
-            {filteredBuildings.map((building) => (
-              <tr key={building.id}>
-                {editingBuildingId === building.id && editedBuilding ? (
+            {filteredroad.map((roads) => (
+              <tr key={roads.id}>
+                {editingroadId === roads.id && editedroad ? (
                   <>
                     <td className="border px-4 py-2">
                       <input
                         type="text"
                         name="name"
-                        value={editedBuilding.name}
+                        value={editedroad.name}
                         onChange={handleEditInputChange}
                         className="border rounded p-1 w-full"
                       />
@@ -323,7 +253,7 @@ useEffect(() => {
                       <input
                         type="text"
                         name="description"
-                        value={editedBuilding.description}
+                        value={editedroad.description}
                         onChange={handleEditInputChange}
                         className="border rounded p-1 w-full"
                       />
@@ -341,17 +271,17 @@ useEffect(() => {
                   </>
                 ) : (
                   <>
-                    <td className="border px-4 py-2">{building.name}</td>
-                    <td className="border px-4 py-2">{building.description}</td>
+                    <td className="border px-4 py-2">{roads.name}</td>
+                    <td className="border px-4 py-2">{roads.description}</td>
                     <td className="border px-4 py-2">
                       <button
-                        onClick={() => handleEdit(building)}
+                        onClick={() => handleEdit(roads)}
                         className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDeleteClick(building.id)}
+                        onClick={() => handleDeleteClick(roads.id)}
                         className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 ml-2"
                       >
                         Delete
@@ -365,7 +295,7 @@ useEffect(() => {
         </table>
       </div>
     </div>
-  );
+  )
 }
 
-export default Build;
+export default Roads

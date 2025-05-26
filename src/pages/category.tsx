@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect,useState } from 'react';
 
 interface category {
   id: number; // Add an ID for tracking items
@@ -7,9 +8,14 @@ interface category {
 }
 
 function Category() {
-  const [Categories, setCategories] = useState<category[]>([
-    { id: 1, name: 'buildings', description: 'buildings' },
-  ]);
+ // const [Categories, setCategories] = useState<category[]>([
+    //{ id: 1, name: 'buildings', description: 'buildings' },
+  //]);
+  const [Categories, setCategories] = useState<category[]>([]);
+  
+    useEffect(() => {
+      console.log("Categories",Categories );
+    }, [Categories]);
 
   const [newcategoryName, setNewcategoryName] = useState('');
   const [newDescription, setNewDescription] = useState('');
@@ -18,6 +24,7 @@ function Category() {
   const [filteredCategory, setFilteredCategory] = useState<category[]>(Categories);
   const [editingcategoryId, setEditingcategoryId] = useState<number | null>(null);
   const [editedcategory, setEditedcategory] = useState<category | null>(null);
+  const [showMessage, setShowMessage] = useState(false); // State for message box
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -51,7 +58,7 @@ function Category() {
     setFilteredCategory(filtered);
   };
 
-  const handleAddItem = () => {
+  const handleAddItem = async () => {
     if (newcategoryName.trim() && newDescription.trim()) {
       const newcategory: category = {
         id: Date.now(), // Generate a unique ID
@@ -62,6 +69,28 @@ function Category() {
       setFilteredCategory([...Categories, newcategory]); // Update filtered list
       setNewcategoryName('');
       setNewDescription('');
+      setShowMessage(true); // Show the message box
+      try {
+        console.log("object", newcategory)
+       const response = await axios.post(
+          'http://localhost:3000/api/normcatagory/add',
+          { newcategory },
+          { withCredentials: true }
+        );
+
+        if (response.data.success) {
+          // console.log("response.data.data", response.data.data);
+
+        } else {
+          // form.reset({});
+          
+        }
+      } catch (error) {
+        console.error("Error fetching person:", error);
+      }
+
+       // Hide the message box after 3 seconds
+      setTimeout(() => setShowMessage(false), 3000);
     }
   };
 
@@ -94,7 +123,12 @@ function Category() {
     setCategories(updatedCategories);
     setFilteredCategory(updatedCategories); // Update filtered list
   };
+  
 
+  
+  
+
+ 
   return (
     <div className="ml-[20%] mt-[10%] h-screen">
       <h1 className="text-3xl font-bold mb-6">Norm Category</h1>
@@ -157,6 +191,13 @@ function Category() {
           </button>
         </div>
       </div>
+       {/* Message Box */}
+       {showMessage && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+           added successfully!
+        </div>
+      )}
+
 
       {/* Norm Category List Section */}
       <div>
