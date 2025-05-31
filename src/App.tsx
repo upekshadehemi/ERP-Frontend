@@ -7,6 +7,7 @@ import Build from './pages/build';
 import Detail from './pages/detail';
 import Header from './pages/header'
 import Category from './pages/category';
+import Home from './pages/home';
 
 
 
@@ -29,6 +30,8 @@ const App: React.FC = () => {
           <Route path='/detail' element={<Detail/>}/>
           <Route path='/header' element={<Header/>}/>
           <Route path='/category' element={<Category/>}/>
+            <Route path='/home' element={<Home/>}/>
+
 
         
    

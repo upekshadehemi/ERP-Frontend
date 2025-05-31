@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-
+import axios from 'axios';
 interface road {
   id: number; // Add an ID for tracking items
   name: string;
@@ -28,7 +28,7 @@ function Roads() {
        const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
           const { name, value } = e.target;
           switch (name) {
-            case 'newroadname':
+            case 'newroadName':
               setNewroadName(value);
               break;
             case 'newDescription':
@@ -67,6 +67,24 @@ function Roads() {
       setNewroadName('');
       setNewDescription('');
       setShowMessage(true); // Show the message box
+ /*try {
+        console.log("object", newroad)
+       const response = await axios.post(
+          'http://localhost:3000/api/normgroup/add',
+          { newroad },
+          { withCredentials: true }
+        );
+
+        if (response.data.success) {
+          // console.log("response.data.data", response.data.data);
+
+        } else {
+          // form.reset({});
+          
+        }
+      } catch (error) {
+        console.error("Error fetching person:", error);
+      }*/
 
      
       // Hide the message box after 3 seconds

@@ -126,7 +126,24 @@ function Category() {
   
 
   
-  
+  useEffect(() => {
+  const fetchcategoryList = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/normcatagory/get-all-data',{
+        withCredentials: true
+      }); 
+
+      const data = await response.data.data;
+      setCategories(data);
+      setFilteredCategory(data);
+      console.log("Norm category list:", data);
+    } catch (error) {
+      console.error("Failed to fetch norm details:", error);
+    }
+  };
+
+  fetchcategoryList();
+}, []);
 
  
   return (

@@ -1,7 +1,9 @@
 //import { parse } from 'postcss';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { parse } from 'postcss';
 interface Detail {
+  normheaderid:number;
    detailid: number; // Add an ID for tracking items
    resourcetype: string;
    resourceid: number;
@@ -19,7 +21,7 @@ function detail(){
     useEffect(() => {
       console.log("detail", detail);
     }, [detail]);
-
+const[newnormheaderid,setNewnormheaderid]=useState('');
     const [newresourcetype, setNewresourcetype] = useState('');
       const [newresourceid, setNewresourceid] = useState('');
       const [newunit, setNewunit] = useState('');
@@ -47,6 +49,9 @@ function detail(){
       const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
           const { name, value } = e.target;
           switch (name) {
+             case 'id':
+              setNewnormheaderid(value);
+              break;
             case 'newresourcetype':
               setNewresourcetype(value);
               break;
@@ -88,9 +93,10 @@ function detail(){
         setFiltereddetail(filtered);
   };
     const handleAddItem = async () => {
-    if (newresourcetype.trim() && newresourceid.trim() && newunit.trim() && newquantity.trim() && newwastage.trim() && newamount.trim() && newunitprice.trim()) {
+    if ( newnormheaderid.trim()&& newresourcetype.trim() && newresourceid.trim() && newunit.trim() && newquantity.trim() && newwastage.trim() && newamount.trim() && newunitprice.trim()) {
       const newdetail: Detail = {
         detailid: Date.now(), // Generate a unique ID
+        normheaderid:parseFloat(newnormheaderid.trim()),
         resourcetype: newresourcetype.trim(),
         resourceid: parseFloat(newresourceid.trim()),
         unit:newunit.trim(),
@@ -101,6 +107,7 @@ function detail(){
       };
       setdetail([...detail, newdetail]);
       setFiltereddetail([...detail, newdetail]); // Update filtered list
+      setNewnormheaderid('');
       setNewresourcetype('');
       setNewresourceid('');
       setNewunit('');
@@ -142,25 +149,48 @@ function detail(){
       const { name, value } = e.target;
       if (editeddetail) {
         setEditeddetail({ ...editeddetail, [name]: value });
+        
       }
     };
 
-    const handleUpdate = async ()  => {
-    if (editeddetail) {
-      const updateddetail = detail.map((detail1) =>
-        detail1.detailid === editeddetail.detailid ? { ...editeddetail } : detail1
-      );
-      setdetail(updateddetail);
-      setFiltereddetail(updateddetail); // Update filtered list
-      setEditingId(null);
-      setEditeddetail(null);
-      setEditMessage(true); //show the edit message box
+    
 
-      
-      // Hide the message box after 3 seconds
-      setTimeout(() => setEditMessage(false), 3000);
+  // ...existing code...
+
+const handleUpdate = async ()  => {
+  if (editeddetail) {
+    try {
+      // Send update to backend
+      const response = await axios.put(
+        `http://localhost:3000/api/normdetails/update/${editeddetail.detailid}`,
+        editeddetail,
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        // Update local state if backend update is successful
+        const updateddetail = detail.map((detail1) =>
+          detail1.detailid === editeddetail.detailid ? { ...editeddetail } : detail1
+        );
+        setdetail(updateddetail);
+        setFiltereddetail(updateddetail);
+        setEditingId(null);
+        setEditeddetail(null);
+        setEditMessage(true);
+        setTimeout(() => setEditMessage(false), 3000);
+      } else {
+        // Handle error from backend
+        alert("Update failed on server.");
+      }
+    } catch (error) {
+      console.error("Error updating detail:", error);
+      alert("Error updating detail.");
     }
-  };
+     
+  }
+};
+
+// ...existing code...
    const handleDeleteClick = (detailid: number) => {
     setdetailToDelete(detailid); // Set the building to delete
     setShowDeleteConfirmation(true); // Show the confirmation box
@@ -180,6 +210,46 @@ function detail(){
     setShowDeleteConfirmation(false); // Hide the confirmation box
     setdetailToDelete(null); // Reset the building to delete
   };
+
+ const[idlist,setIdList]=useState([]);
+
+  useEffect(() => {
+  const fetchNormDetails = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/normdetails/get-id',{
+        withCredentials: true
+      }); 
+
+      const data = await response.data.data;
+      setIdList(data);
+      console.log("Norm Details:", data);
+    } catch (error) {
+      console.error("Failed to fetch norm details:", error);
+    }
+  };
+
+  fetchNormDetails();
+}, []);
+
+  useEffect(() => {
+  const fetchNormDetailsList = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/normdetails/get-all-data',{
+        withCredentials: true
+      }); 
+
+      const data = await response.data.data;
+      setdetail(data);
+      setFiltereddetail(data);
+      console.log("Norm Details list:", data);
+    } catch (error) {
+      console.error("Failed to fetch norm details:", error);
+    }
+  };
+
+  fetchNormDetailsList();
+}, []);
+
 
   
   return (
@@ -244,7 +314,20 @@ function detail(){
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-2">Add New Norm Details</h2>
         <div className="flex flex-col md:flex-row gap-4">
-          
+         <select
+          name="id"
+          value={newnormheaderid.toString()}
+          onChange={handleInputChange}
+          className="border p-2 rounded w-40% md:w-1/3"
+        >
+          <option value="">Select id</option>
+          {idlist.map((type : any) => (
+            <option key={type} value={type.norm_id.toString()}>
+              {type.norm_id}
+            </option>
+          ))}
+        </select>
+  
         <select
           name="newresourcetype"
           value={newresourcetype}
@@ -333,6 +416,7 @@ function detail(){
         <table className="w-full border">
           <thead className="bg-gray-200">
             <tr>
+            
               <th className="border px-4 py-2 text-left">resourcetype</th>
               <th className="border px-4 py-2 text-left">resourceid</th>
               <th className="border px-4 py-2 text-left">unit</th>
@@ -340,6 +424,8 @@ function detail(){
               <th className="border px-4 py-2 text-left">wastage</th>
               <th className="border px-4 py-2 text-left">unitprice</th>
               <th className="border px-4 py-2 text-left">amount</th>
+           
+              
               <th className="border px-4 py-2 text-left">Actions</th>
             </tr>
           </thead>

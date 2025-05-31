@@ -4,6 +4,7 @@
 //import { Link } from 'react-router-dom'
 
 import Logo from '../assets/Logo.png'
+import { Link } from 'react-router-dom';
 
 function NavBar() {
   return (
@@ -15,20 +16,21 @@ function NavBar() {
 
       {/* Menu Section */}
       <div className="flex space-x-10 text-white">
-        <div className="p-2">
-          <h1 className="font-bold text-lg hover:underline cursor-pointer">Home</h1>
-        </div>
-        <div className="p-2">
-          <h1 className="font-bold text-lg hover:underline cursor-pointer">About Us</h1>
-        </div>
-        <div className="p-2">
-          <h1 className="font-bold text-lg hover:underline cursor-pointer">Contact Us</h1>
-        </div>
-        <div className="p-2">
-          <h1 className="font-bold text-lg hover:underline cursor-pointer">Services</h1>
-        </div>
+  <div className="p-2">
+    <Link to="/home" className="font-bold text-lg hover:underline cursor-pointer">Home</Link>
+  </div>
+  <div className="p-2">
+    <Link to="/about" className="font-bold text-lg hover:underline cursor-pointer">About Us</Link>
+  </div>
+  <div className="p-2">
+    <Link to="/contact" className="font-bold text-lg hover:underline cursor-pointer">Contact Us</Link>
+  </div>
+  <div className="p-2">
+    <Link to="/services" className="font-bold text-lg hover:underline cursor-pointer">Services</Link>
+  </div>
+</div>
       </div>
-    </div>
+   
   );
 }
 

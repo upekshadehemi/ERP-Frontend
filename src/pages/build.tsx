@@ -21,7 +21,7 @@ function Build() {
   const [newbuildName, setNewbuildName] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
-  const [searchType, setSearchType] = useState('name'); // State for search type (id or name)
+  const [searchType, setSearchType] = useState(''); // State for search type (id or name)
   const [filteredBuildings, setFilteredBuildings] = useState<buildings[]>(Buildings);
   const [editingBuildingId, setEditingBuildingId] = useState<number | null>(null);
   const [editedBuilding, setEditedBuilding] = useState<buildings | null>(null);
@@ -158,9 +158,13 @@ function Build() {
     setShowDeleteConfirmation(true); // Show the confirmation box
   };
 
-  const confirmDelete = () => {
+  const confirmDelete =  async() => {
     if (buildingToDelete !== null) {
       const updatedBuildings = Buildings.filter((building) => building.id !== buildingToDelete);
+       await axios.delete(`http://localhost:3000/api/normgroup/${buildingToDelete}`, {
+        withCredentials: true,
+      });
+      
       setBuildings(updatedBuildings);
       setFilteredBuildings(updatedBuildings); // Update filtered list
       setShowDeleteConfirmation(false); // Hide the confirmation box
@@ -173,23 +177,25 @@ function Build() {
     setBuildingToDelete(null); // Reset the building to delete
   };
 
-  // ...existing code...
+ 
 useEffect(() => {
-  // Fetch normgroups from backend
-  const fetchBuildings = async () => {
+  const fetchbuildingsList = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/normgroup/all', { withCredentials: true });
-      if (response.data.success) {
-        setBuildings(response.data.data);
-        setFilteredBuildings(response.data.data);
-      }
+      const response = await axios.get('http://localhost:3000/api/normgroup/get-all-data',{
+        withCredentials: true
+      }); 
+
+      const data = await response.data.data;
+      setBuildings(data);
+       setFilteredBuildings(data);
+      console.log("buildings list:", data);
     } catch (error) {
-      console.error('Error fetching normgroups:', error);
+      console.error("Failed to fetch buildings:", error);
     }
   };
-  fetchBuildings();
+
+  fetchbuildingsList();
 }, []);
-// ...existing code...
 
 
   return (

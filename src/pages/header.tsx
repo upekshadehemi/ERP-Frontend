@@ -177,6 +177,24 @@ const handleDelete = (id: number) => {
     setShowDeleteConfirmation(false); // Hide the confirmation box
     setnormsToDelete(null); // Reset the building to delete
   };
+   useEffect(() => {
+  const fetchnormsList = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/norms/get-all-data',{
+        withCredentials: true
+      }); 
+
+      const data = await response.data.data;
+      setNorms(data);
+      setFilterednorms(data);
+      console.log("Norm Details list:", data);
+    } catch (error) {
+      console.error("Failed to fetch norm details:", error);
+    }
+  };
+
+  fetchnormsList();
+}, []);
 
   
   return (
