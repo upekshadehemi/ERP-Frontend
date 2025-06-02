@@ -1,9 +1,11 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 
 interface buildings {
   id: number; // Add an ID for tracking items
+  norm_group_id: number; // Add an ID for tracking items
   name: string;
+  group_name: string;
   description: string;
 }
 
@@ -15,34 +17,36 @@ function Build() {
   const [Buildings, setBuildings] = useState<buildings[]>([]);
 
   useEffect(() => {
-    console.log("Buildings", Buildings);
+    console.log("Buildings", buildingToDelete);
   }, [Buildings]);
 
   const [newbuildName, setNewbuildName] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
-  const [searchType, setSearchType] = useState(''); // State for search type (id or name)
+  const [searchType, setSearchType] = useState('name'); // State for search type (id or name)
   const [filteredBuildings, setFilteredBuildings] = useState<buildings[]>(Buildings);
   const [editingBuildingId, setEditingBuildingId] = useState<number | null>(null);
   const [editedBuilding, setEditedBuilding] = useState<buildings | null>(null);
   const [showMessage, setShowMessage] = useState(false); // State for message box
-  const[editMessage,setEditMessage]=useState(false);//state for edit message box
+  const [editMessage, setEditMessage] = useState(false); //state for edit message box
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false); // State for delete confirmation
   const [buildingToDelete, setBuildingToDelete] = useState<number | null>(null); // Track building to delete
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     switch (name) {
-      case 'newbuildName':
+      case "newbuildName":
         setNewbuildName(value);
         break;
-      case 'newDescription':
+      case "newDescription":
         setNewDescription(value);
         break;
-      case 'searchQuery': // Handle search query input
+      case "searchQuery": // Handle search query input
         setSearchQuery(value);
         break;
-      case 'searchType': // Handle search type selection
+      case "searchType": // Handle search type selection
         setSearchType(value);
         break;
       default:
@@ -51,23 +55,26 @@ function Build() {
   };
 
   const handleSearch = async () => {
-  try {
-    const response = await axios.get('http://localhost:3000/api/normgroup/:aid', {
-      params: {
-        [searchType]: searchQuery
-      },
-      withCredentials: true
-    });
-    if (response.data.success) {
-      setFilteredBuildings(response.data.data);
-    } else {
+    try {
+      const response = await axios.get(
+        "http://localhost:3000/api/normgroup/:aid",
+        {
+          params: {
+            [searchType]: searchQuery,
+          },
+          withCredentials: true,
+        }
+      );
+      if (response.data.success) {
+        setFilteredBuildings(response.data.data);
+      } else {
+        setFilteredBuildings([]);
+      }
+    } catch (error) {
+      console.error("Error searching normgroups:", error);
       setFilteredBuildings([]);
     }
-  } catch (error) {
-    console.error('Error searching normgroups:', error);
-    setFilteredBuildings([]);
-  }
-};
+  };
   const handleAddItem = async () => {
     if (newbuildName.trim() && newDescription.trim()) {
       const newBuilding: buildings = {
@@ -77,24 +84,22 @@ function Build() {
       };
       setBuildings([...Buildings, newBuilding]);
       setFilteredBuildings([...Buildings, newBuilding]); // Update filtered list
-      setNewbuildName('');
-      setNewDescription('');
+      setNewbuildName("");
+      setNewDescription("");
       setShowMessage(true); // Show the message box
 
       try {
-        console.log("object", newBuilding)
-       const response = await axios.post(
-          'http://localhost:3000/api/normgroup/add',
+        console.log("object", newBuilding);
+        const response = await axios.post(
+          "http://localhost:3000/api/normgroup/add",
           { newBuilding },
           { withCredentials: true }
         );
 
         if (response.data.success) {
           // console.log("response.data.data", response.data.data);
-
         } else {
           // form.reset({});
-          
         }
       } catch (error) {
         console.error("Error fetching person:", error);
@@ -106,9 +111,10 @@ function Build() {
   };
 
   const handleEdit = (building: buildings) => {
-    setEditingBuildingId(building.id);
-    setEditedBuilding({ ...building }); // Create a copy for editing
+    console.log("buildingqqqq", building);
 
+    setEditingBuildingId(building.id);
+    setEditedBuilding(building); // Directly assign the building object
   };
 
   const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,7 +124,7 @@ function Build() {
     }
   };
 
-  const handleUpdate = async ()  => {
+  const handleUpdate = async () => {
     if (editedBuilding) {
       const updatedBuildings = Buildings.map((building) =>
         building.id === editedBuilding.id ? { ...editedBuilding } : building
@@ -128,10 +134,10 @@ function Build() {
       setEditingBuildingId(null);
       setEditedBuilding(null);
       setEditMessage(true); //show the edit message box
- try {
-        console.log("object", updatedBuildings)
-        console.log("editingBuildingId", editingBuildingId)
-       const response = await axios.post(
+      try {
+        console.log("object", updatedBuildings);
+        console.log("editingBuildingId", editingBuildingId);
+        const response = await axios.post(
           `http://localhost:3000/api/normgroup/${editingBuildingId}`,
           { updatedBuildings },
           { withCredentials: true }
@@ -139,35 +145,48 @@ function Build() {
 
         if (response.data.success) {
           // console.log("response.data.data", response.data.data);
-
         } else {
           // form.reset({});
-          
         }
       } catch (error) {
         console.error("Error fetching person:", error);
       }
-      
+
       // Hide the message box after 3 seconds
       setTimeout(() => setEditMessage(false), 3000);
     }
   };
 
-   const handleDeleteClick = (id: number) => {
+  const handleDeleteClick = (id: number) => {
+    console.log("id",id)
+    
     setBuildingToDelete(id); // Set the building to delete
     setShowDeleteConfirmation(true); // Show the confirmation box
   };
 
-  const confirmDelete =  async() => {
+  const confirmDelete = () => {
     if (buildingToDelete !== null) {
       const updatedBuildings = Buildings.filter((building) => building.id !== buildingToDelete);
-       await axios.delete(`http://localhost:3000/api/normgroup/${buildingToDelete}`, {
-        withCredentials: true,
-      });
-      
       setBuildings(updatedBuildings);
       setFilteredBuildings(updatedBuildings); // Update filtered list
       setShowDeleteConfirmation(false); // Hide the confirmation box
+      try {
+        console.log("object", updatedBuildings);
+        console.log("editingBuildingId", editingBuildingId);
+        const response = await axios.delete(
+          `http://localhost:3000/api/normgroup/delete/${buildingToDelete}`,
+
+          { withCredentials: true }
+        );
+
+        if (response.data.success) {
+          // console.log("response.data.data", response.data.data);
+        } else {
+          // form.reset({});
+        }
+      } catch (error) {
+        console.error("Error fetching person:", error);
+      }
       setBuildingToDelete(null); // Reset the building to delete
     }
   };
@@ -177,25 +196,23 @@ function Build() {
     setBuildingToDelete(null); // Reset the building to delete
   };
 
- 
+  // ...existing code...
 useEffect(() => {
-  const fetchbuildingsList = async () => {
+  // Fetch normgroups from backend
+  const fetchBuildings = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/normgroup/get-all-data',{
-        withCredentials: true
-      }); 
-
-      const data = await response.data.data;
-      setBuildings(data);
-       setFilteredBuildings(data);
-      console.log("buildings list:", data);
+      const response = await axios.get('http://localhost:3000/api/normgroup/all', { withCredentials: true });
+      if (response.data.success) {
+        setBuildings(response.data.data);
+        setFilteredBuildings(response.data.data);
+      }
     } catch (error) {
-      console.error("Failed to fetch buildings:", error);
+      console.error('Error fetching normgroups:', error);
     }
   };
-
-  fetchbuildingsList();
+  fetchBuildings();
 }, []);
+// ...existing code...
 
 
   return (
@@ -232,7 +249,6 @@ useEffect(() => {
         </div>
       </div>
 
-     
       {/* ...existing code... */}
 
       {/* Delete Confirmation Box */}
@@ -286,23 +302,22 @@ useEffect(() => {
           </button>
         </div>
       </div>
-       {/* Message Box */}
-       {showMessage && (
+      {/* Message Box */}
+      {showMessage && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-           added successfully!
+          added successfully!
         </div>
       )}
-
 
       {/* Norm Group List Section */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Norm Group List</h2>
-         {/* Edit Success Message */}
-  {editMessage && (
-    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-      Update successful!
-    </div>
-  )}
+        {/* Edit Success Message */}
+        {editMessage && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+            Update successful!
+          </div>
+        )}
         <table className="w-full border">
           <thead className="bg-gray-200">
             <tr>
@@ -314,13 +329,15 @@ useEffect(() => {
           <tbody>
             {filteredBuildings.map((building) => (
               <tr key={building.id}>
-                {editingBuildingId === building.id && editedBuilding ? (
+                {/* {editingBuildingId === building.id && editedBuilding ? ( */}
+                {editedBuilding ? (
                   <>
                     <td className="border px-4 py-2">
                       <input
                         type="text"
                         name="name"
-                        value={editedBuilding.name}
+                        // value={editedBuilding.group_name}
+                        value={building.group_name}
                         onChange={handleEditInputChange}
                         className="border rounded p-1 w-full"
                       />
@@ -329,7 +346,8 @@ useEffect(() => {
                       <input
                         type="text"
                         name="description"
-                        value={editedBuilding.description}
+                        // value={editedBuilding.description}
+                        value={building.description}
                         onChange={handleEditInputChange}
                         className="border rounded p-1 w-full"
                       />
@@ -341,13 +359,11 @@ useEffect(() => {
                       >
                         Update
                       </button>
-                      
                     </td>
-                    
                   </>
                 ) : (
                   <>
-                    <td className="border px-4 py-2">{building.name}</td>
+                    <td className="border px-4 py-2">{building.group_name}</td>
                     <td className="border px-4 py-2">{building.description}</td>
                     <td className="border px-4 py-2">
                       <button
@@ -357,7 +373,9 @@ useEffect(() => {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDeleteClick(building.id)}
+                        onClick={() =>
+                          handleDeleteClick(building.norm_group_id)
+                        }
                         className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 ml-2"
                       >
                         Delete
