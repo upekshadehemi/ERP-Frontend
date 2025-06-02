@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 
 interface buildings {
   id: number; // Add an ID for tracking items
-  norm_group_id: number; // Add an ID for tracking items
+  //norm_group_id: number; // Add an ID for tracking items
   name: string;
   group_name: string;
   description: string;
@@ -19,7 +19,7 @@ function Build() {
   useEffect(() => {
     console.log("Buildings", buildingToDelete);
   }, [Buildings]);
-
+  const [showModal, setShowModal] = useState(false);
   const [newbuildName, setNewbuildName] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
@@ -31,6 +31,15 @@ function Build() {
   const [editMessage, setEditMessage] = useState(false); //state for edit message box
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false); // State for delete confirmation
   const [buildingToDelete, setBuildingToDelete] = useState<number | null>(null); // Track building to delete
+   const handleSubmit = () => {
+    alert("Form submitted!");
+    setShowModal(false);
+  };
+  const showpopup = () => {
+    
+    setShowModal(true);
+  };
+
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -78,10 +87,12 @@ function Build() {
   const handleAddItem = async () => {
     if (newbuildName.trim() && newDescription.trim()) {
       const newBuilding: buildings = {
-        id: Date.now(), // Generate a unique ID
-        name: newbuildName.trim(),
-        description: newDescription.trim(),
-      };
+  id: Date.now(),
+  //norm_group_id: 0, // or get from user input
+  name: newbuildName.trim(),
+  group_name: "",   // or get from user input
+  description: newDescription.trim(),
+};
       setBuildings([...Buildings, newBuilding]);
       setFilteredBuildings([...Buildings, newBuilding]); // Update filtered list
       setNewbuildName("");
@@ -125,37 +136,35 @@ function Build() {
   };
 
   const handleUpdate = async () => {
-    if (editedBuilding) {
-      const updatedBuildings = Buildings.map((building) =>
-        building.id === editedBuilding.id ? { ...editedBuilding } : building
+  if (editedBuilding) {
+    try {
+      // Send only the updated building to the backend
+      const response = await axios.put(
+        `http://localhost:3000/api/normgroup/update/${editedBuilding.id}`,
+        editedBuilding,
+        { withCredentials: true }
       );
-      setBuildings(updatedBuildings);
-      setFilteredBuildings(updatedBuildings); // Update filtered list
-      setEditingBuildingId(null);
-      setEditedBuilding(null);
-      setEditMessage(true); //show the edit message box
-      try {
-        console.log("object", updatedBuildings);
-        console.log("editingBuildingId", editingBuildingId);
-        const response = await axios.post(
-          `http://localhost:3000/api/normgroup/${editingBuildingId}`,
-          { updatedBuildings },
-          { withCredentials: true }
+
+      if (response.data.success) {
+        // Update local state if backend update is successful
+        const updatedBuildings = Buildings.map((building) =>
+          building.id === editedBuilding.id ? { ...editedBuilding } : building
         );
-
-        if (response.data.success) {
-          // console.log("response.data.data", response.data.data);
-        } else {
-          // form.reset({});
-        }
-      } catch (error) {
-        console.error("Error fetching person:", error);
+        setBuildings(updatedBuildings);
+        setFilteredBuildings(updatedBuildings);
+        setEditingBuildingId(null);
+        setEditedBuilding(null);
+        setEditMessage(true); // Show the edit message box
+        setTimeout(() => setEditMessage(false), 3000);
+      } else {
+        alert("Update failed on server.");
       }
-
-      // Hide the message box after 3 seconds
-      setTimeout(() => setEditMessage(false), 3000);
+    } catch (error) {
+      console.error("Error updating building:", error);
+      alert("Error updating building.");
     }
-  };
+  }
+};
 
   const handleDeleteClick = (id: number) => {
     console.log("id",id)
@@ -164,7 +173,7 @@ function Build() {
     setShowDeleteConfirmation(true); // Show the confirmation box
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (buildingToDelete !== null) {
       const updatedBuildings = Buildings.filter((building) => building.id !== buildingToDelete);
       setBuildings(updatedBuildings);
@@ -196,24 +205,24 @@ function Build() {
     setBuildingToDelete(null); // Reset the building to delete
   };
 
-  // ...existing code...
-useEffect(() => {
-  // Fetch normgroups from backend
-  const fetchBuildings = async () => {
+   useEffect(() => {
+  const fetchNormgroupList = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/normgroup/all', { withCredentials: true });
-      if (response.data.success) {
-        setBuildings(response.data.data);
-        setFilteredBuildings(response.data.data);
-      }
+      const response = await axios.get('http://localhost:3000/api/normgroup/get-all-data',{
+        withCredentials: true
+      }); 
+
+      const data = await response.data.data;
+      setBuildings(data);
+      setFilteredBuildings(data);
+      console.log("Norm Details list:", data);
     } catch (error) {
-      console.error('Error fetching normgroups:', error);
+      console.error("Failed to fetch norm details:", error);
     }
   };
-  fetchBuildings();
-}, []);
-// ...existing code...
 
+  fetchNormgroupList();
+}, []);
 
   return (
     <div className="ml-[20%] mt-[10%] h-screen">
@@ -326,68 +335,85 @@ useEffect(() => {
               <th className="border px-4 py-2 text-left">Actions</th>
             </tr>
           </thead>
-          <tbody>
-            {filteredBuildings.map((building) => (
-              <tr key={building.id}>
-                {/* {editingBuildingId === building.id && editedBuilding ? ( */}
-                {editedBuilding ? (
-                  <>
-                    <td className="border px-4 py-2">
-                      <input
-                        type="text"
-                        name="name"
-                        // value={editedBuilding.group_name}
-                        value={building.group_name}
-                        onChange={handleEditInputChange}
-                        className="border rounded p-1 w-full"
-                      />
-                    </td>
-                    <td className="border px-4 py-2">
-                      <input
-                        type="text"
-                        name="description"
-                        // value={editedBuilding.description}
-                        value={building.description}
-                        onChange={handleEditInputChange}
-                        className="border rounded p-1 w-full"
-                      />
-                    </td>
-                    <td className="border px-4 py-2">
-                      <button
-                        onClick={handleUpdate}
-                        className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
-                      >
-                        Update
-                      </button>
-                    </td>
-                  </>
-                ) : (
-                  <>
-                    <td className="border px-4 py-2">{building.group_name}</td>
-                    <td className="border px-4 py-2">{building.description}</td>
-                    <td className="border px-4 py-2">
-                      <button
-                        onClick={() => handleEdit(building)}
-                        className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() =>
-                          handleDeleteClick(building.norm_group_id)
-                        }
-                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 ml-2"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </>
-                )}
-              </tr>
-            ))}
-          </tbody>
+         <tbody>
+  {filteredBuildings.map((building) => (
+    <tr key={building.id}>
+      {editingBuildingId === building.id && editedBuilding ? (
+        <>
+          <td className="border px-4 py-2">
+            <input
+              type="text"
+              name="name"
+              value={editedBuilding.name}
+              onChange={handleEditInputChange}
+              className="border rounded p-1 w-full"
+            />
+          </td>
+          <td className="border px-4 py-2">
+            <input
+              type="text"
+              name="description"
+              value={editedBuilding.description}
+              onChange={handleEditInputChange}
+              className="border rounded p-1 w-full"
+            />
+          </td>
+          <td className="border px-4 py-2">
+            <button
+              onClick={handleUpdate}
+              className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+            >
+              Update
+            </button>
+          </td>
+        </>
+      ) : (
+        <>
+          <td className="border px-4 py-2">{building.name}</td>
+          <td className="border px-4 py-2">{building.description}</td>
+          <td className="border px-4 py-2">
+            <button
+              onClick={() => handleEdit(building)}
+              className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => handleDeleteClick(building.id)}
+              className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 ml-2"
+            >
+              Delete
+            </button>
+          </td>
+        </>
+      )}
+    </tr>
+  ))}
+</tbody>
         </table>
       </div>
+       {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-80 shadow-xl">
+            <h2 className="text-lg font-semibold mb-4">Popup Title</h2>
+            <p className="mb-6">This is a popup message. Do you want to proceed?</p>
+            <div className="flex justify-end space-x-2">
+              <button
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                onClick={() => setShowModal(false)}
+              >
+                Close
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                onClick={handleSubmit}
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
