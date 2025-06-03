@@ -5,7 +5,7 @@ interface buildings {
   id: number; // Add an ID for tracking items
   //norm_group_id: number; // Add an ID for tracking items
   name: string;
-  group_name: string;
+  // group_name: string;
   description: string;
 }
 
@@ -37,10 +37,12 @@ function Build() {
     alert("Form submitted!");
     setShowModal(false);
   };
- const showpopup = () => {
-  showpopup({ id, name, description });
-  setShowModal(true);
-};
+//  const showpopup = ({ id, name, description }:buildings) => {
+  const showpopup = ( { id:id, name, description }: buildings) => {
+  
+   setUpdatenormgroup({ id, name, description });
+   setShowModal(true);
+ };
 
 
   const handleInputChange = (
@@ -123,50 +125,50 @@ function Build() {
     }
   };
 
-  const handleEdit = (building: buildings) => {
-    console.log("buildingqqqq", building);
+//   const handleEdit = (building: buildings) => {
+//     console.log("buildingqqqq", building);
 
-    setEditingBuildingId(building.id);
-    setEditedBuilding(building); // Directly assign the building object
-  };
+//     setEditingBuildingId(building.id);
+//     setEditedBuilding(building); // Directly assign the building object
+//   };
 
-  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    if (editedBuilding) {
-      setEditedBuilding({ ...editedBuilding, [name]: value });
-    }
-  };
+//   const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const { name, value } = e.target;
+//     if (editedBuilding) {
+//       setEditedBuilding({ ...editedBuilding, [name]: value });
+//     }
+//   };
 
-  const handleUpdate = async () => {
-  if (editedBuilding) {
-    try {
-      // Send only the updated building to the backend
-      const response = await axios.put(
-        `http://localhost:3000/api/normgroup/update/${editedBuilding.id}`,
-        editedBuilding,
-        { withCredentials: true }
-      );
+//   const handleUpdate = async () => {
+//   if (editedBuilding) {
+//     try {
+//       // Send only the updated building to the backend
+//       const response = await axios.put(
+//         `http://localhost:3000/api/normgroup/update/${editedBuilding.id}`,
+//         editedBuilding,
+//         { withCredentials: true }
+//       );
 
-      if (response.data.success) {
-        // Update local state if backend update is successful
-        const updatedBuildings = Buildings.map((building) =>
-          building.id === editedBuilding.id ? { ...editedBuilding } : building
-        );
-        setBuildings(updatedBuildings);
-        setFilteredBuildings(updatedBuildings);
-        setEditingBuildingId(null);
-        setEditedBuilding(null);
-        setEditMessage(true); // Show the edit message box
-        setTimeout(() => setEditMessage(false), 3000);
-      } else {
-        alert("Update failed on server.");
-      }
-    } catch (error) {
-      console.error("Error updating building:", error);
-      alert("Error updating building.");
-    }
-  }
-};
+//       if (response.data.success) {
+//         // Update local state if backend update is successful
+//         const updatedBuildings = Buildings.map((building) =>
+//           building.id === editedBuilding.id ? { ...editedBuilding } : building
+//         );
+//         setBuildings(updatedBuildings);
+//         setFilteredBuildings(updatedBuildings);
+//         setEditingBuildingId(null);
+//         setEditedBuilding(null);
+//         setEditMessage(true); // Show the edit message box
+//         setTimeout(() => setEditMessage(false), 3000);
+//       } else {
+//         alert("Update failed on server.");
+//       }
+//     } catch (error) {
+//       console.error("Error updating building:", error);
+//       alert("Error updating building.");
+//     }
+//   }
+// };
 
   const handleDeleteClick = (id: number) => {
     console.log("id",id)
@@ -363,7 +365,7 @@ function Build() {
           </td>
           <td className="border px-4 py-2">
             <button
-              onClick={ () =>showpopup(normgroup.id, normgroup.name, normgroup.description)}
+              onClick={ () =>showpopup({id:normgroup.id, name:normgroup.name, description:normgroup.description,})}
               className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
             >
               Update
@@ -401,6 +403,25 @@ function Build() {
           <div className="bg-white rounded-xl p-6 w-80 shadow-xl">
             <h2 className="text-lg font-semibold mb-4">Popup Title</h2>
             <p className="mb-6">This is a popup message. Do you want to proceed?</p>
+            <div className="mb-4">
+              <label className="block mb-2">Name:</label>
+              <input
+                type="text"
+                value={updatenormgroup?.name || ''}
+                // onChange={(e) => setUpdatenormgroup({ ...updatenormgroup, name: e.target.value })}
+                className="border p-2 rounded w-full"
+              />
+            </div>
+            <div className="mb-4">  
+              <label className="block mb-2">Description:</label>
+              <input
+                type="text"
+                value={updatenormgroup?.description || ''}
+                // onChange={(e) => setUpdatenormgroup({ ...updatenormgroup, description: e.target.value })}
+                className="border p-2 rounded w-full"
+              />
+            </div>
+
             <div className="flex justify-end space-x-2">
               <button
                 className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
