@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
 const Sidebar: React.FC = () => {
-  const [openDropdown, setOpenDropdown] = useState<boolean>(false);
+  // const [openDropdown, setOpenDropdown] = useState<boolean>(false);
 
   return (
     <div id="sidebar" className="fixed left-0 top-0 h-full w-64 bg-blue-900 text-white shadow-lg mt-10">
@@ -15,12 +15,12 @@ const Sidebar: React.FC = () => {
   
       {/* Section: Normgroup */}
       <div className="space-y-1 mb-6 flex gap-4">
-        <button
-          onClick={() => setOpenDropdown(!openDropdown)}
-          className="w-full text-left bg-white text-blue-900 px-4 py-2 rounded-lg hover:bg-gray-200 font-semibold transition"
-        >
-          Normgroup
-        </button>
+       <NavLink
+            to="/bulidings"
+            className="w-full text-left bg-white text-blue-900 px-4 py-2 rounded-lg hover:bg-gray-200 font-semibold transition"
+          >
+            Normgroup
+          </NavLink>
   
         <NavLink
           to="/manage"
@@ -29,23 +29,17 @@ const Sidebar: React.FC = () => {
           Manage
         </NavLink>
       </div>
-      {openDropdown && (
+     
           <div className="pl-4 mt-2 space-y-2 flex flex-col">
-            <NavLink
-              to="/group/bulidings"
-              className="block text-sm text-white hover:underline"
-            >
-              Buildings
-            </NavLink>
-            <br></br>
-            <NavLink
+            
+            {/* <NavLink
               to="/group/Roads"
               className="block text-sm text-white hover:underline"
             >
               Roads
-            </NavLink>
+            </NavLink> */}
           </div>
-        )}
+        
   
       {/* Reusable NavLink Section */}
       {[

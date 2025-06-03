@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { parse } from 'postcss';
+
 interface Detail {
   normheaderid:number;
    detailid: number; // Add an ID for tracking items
@@ -38,7 +39,8 @@ const[newnormheaderid,setNewnormheaderid]=useState('');
       const[editMessage,setEditMessage]=useState(false);//state for edit message box
       const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false); // State for delete confirmation
       const [detailToDelete, setdetailToDelete] = useState<number | null>(null); // Track building to delete
-
+      const [updatenormdetail, setUpdatenormdetail] = useState<Detail | null>(null); // Track building to update
+      const [showModal, setShowModal] = useState(false);
       const resourceTypeOptions = [
   "Material",
   "Labor",
@@ -46,6 +48,11 @@ const[newnormheaderid,setNewnormheaderid]=useState('');
   "Machinery",
   "Other"
 ];
+const showpopup = ( { normheaderid,  detailid,  resourcetype, resourceid,unit,quantity,wastage,unitprice,amount }: Detail) => {
+  
+   setUpdatenormdetail({ normheaderid,detailid,  resourcetype, resourceid,unit,quantity,wastage,unitprice,amount });
+   setShowModal(true);
+ };
       const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
           const { name, value } = e.target;
           switch (name) {
@@ -432,74 +439,33 @@ const handleUpdate = async ()  => {
           <tbody>
             {filtereddetail.map((detail) => (
               <tr key={detail.detailid}>
-                {editingId === detail.detailid && editeddetail ? (
+                {/* {editingId === detail.detailid && editeddetail ? ( */}
                   <>
                     <td className="border px-4 py-2">
-                      <input
-                        type="text"
-                        name="name"
-                        value={editeddetail.resourcetype}
-                        onChange={handleEditInputChange}
-                        className="border rounded p-1 w-full"
-                      />
+                     <label   className="border rounded p-1 w-full"> {detail.resourcetype}</label>
                     </td>
                     <td className="border px-4 py-2">
-                      <input
-                        type="number"
-                        name="resourceid"
-                        value={editeddetail.resourceid}
-                        onChange={handleEditInputChange}
-                        className="border rounded p-1 w-full"
-                      />
+                      <label   className="border rounded p-1 w-full"> {detail.resourceid}</label>
                     </td>
                      <td className="border px-4 py-2">
-                      <input
-                        type="text"
-                        name="unit"
-                        value={editeddetail.unit}
-                        onChange={handleEditInputChange}
-                        className="border rounded p-1 w-full"
-                      />
+                     <label   className="border rounded p-1 w-full"> {detail.unit}</label>
                     </td>
                      <td className="border px-4 py-2">
-                      <input
-                        type="number"
-                        name="quantity"
-                        value={editeddetail.quantity}
-                        onChange={handleEditInputChange}
-                        className="border rounded p-1 w-full"
-                      />
+                      <label   className="border rounded p-1 w-full"> {detail.quantity}</label>
                     </td>
                      <td className="border px-4 py-2">
-                      <input
-                        type="number"
-                        name="wastage"
-                        value={editeddetail.wastage}
-                        onChange={handleEditInputChange}
-                        className="border rounded p-1 w-full"
-                      />
+                     <label   className="border rounded p-1 w-full"> {detail.wastage}</label>
                     </td>
                       <td className="border px-4 py-2">
-                      <input
-                        type="number"
-                        name="unitprice"
-                        value={editeddetail.unitprice}
-                        onChange={handleEditInputChange}
-                        className="border rounded p-1 w-full"
-                      />
+                     <label   className="border rounded p-1 w-full"> {detail.unitprice}</label>
                     </td>
                       <td className="border px-4 py-2">
-                      <input
-                        type="number"
-                        name="amount"
-                        value={editeddetail.amount}
-                        onChange={handleEditInputChange}
-                        className="border rounded p-1 w-full"
-                      />
+                     <label   className="border rounded p-1 w-full"> {detail.amount}</label>
                     </td>
                     <td className="border px-4 py-2">
                       <button
-                        onClick={handleUpdate}
+                        onClick={ () =>showpopup({normheaderid:detail.normheaderid, resourcetype:detail.resourcetype, 
+                          unit:detail.unit, resourceid:detail.resourceid, quantity:detail.quantity, wastage:detail.wastage, unitprice:detail.unitprice, amount:detail.amount, detailid:detail.detailid})}
                         className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
                       >
                         Update
@@ -508,7 +474,7 @@ const handleUpdate = async ()  => {
                     </td>
                     
                   </>
-                ) : (
+                {/* ) : (
                   <>
                     <td className="border px-4 py-2">{detail.resourcetype}</td>
                     <td className="border px-4 py-2">{detail.resourceid}</td>
@@ -532,7 +498,7 @@ const handleUpdate = async ()  => {
                       </button>
                     </td>
                   </>
-                )}
+                )} */}
               </tr>
             ))}
           </tbody>

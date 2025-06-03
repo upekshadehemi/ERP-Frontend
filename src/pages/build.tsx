@@ -1,5 +1,8 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+
 
 interface buildings {
   id: number; // Add an ID for tracking items
@@ -43,7 +46,26 @@ function Build() {
    setUpdatenormgroup({ id, name, description });
    setShowModal(true);
  };
+const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Norm Group List", 10,10);
 
+     // Prepare table rows
+    const rows = filteredBuildings.map((normgroup) => [
+      normgroup.name,
+      normgroup.description,
+    ]);
+
+
+    // Add table
+    (doc as any).autoTable({
+      head: [["Name", "Description"]],
+      body: rows,
+      startY: 22,
+    });
+
+    doc.save("norm-group-list.pdf");
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -94,7 +116,7 @@ function Build() {
   id: Date.now(),
   //norm_group_id: 0, // or get from user input
   name: newbuildName.trim(),
-  group_name: "",   // or get from user input
+  
   description: newDescription.trim(),
 };
       setBuildings([...Buildings, newBuilding]);
@@ -169,6 +191,34 @@ function Build() {
 //     }
 //   }
 // };
+
+const handleUpdate = async () => {
+  if (updatenormgroup) {
+    try {
+      const response = await axios.put(
+        `http://localhost:3000/api/normgroup/update/${updatenormgroup.id}`,
+        updatenormgroup,
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        // Update local state
+        const updatedBuildings = Buildings.map((building) =>
+          building.id === updatenormgroup.id ? { ...updatenormgroup } : building
+        );
+        setBuildings(updatedBuildings);
+        setFilteredBuildings(updatedBuildings);
+        setShowModal(false);
+        setEditMessage(true);
+        setTimeout(() => setEditMessage(false), 3000);
+      } else {
+        alert("Update failed on server.");
+      }
+    } catch (error) {
+      console.error("Error updating norm group:", error);
+      alert("Error updating norm group.");
+    }
+  }
+};
 
   const handleDeleteClick = (id: number) => {
     console.log("id",id)
@@ -313,6 +363,12 @@ function Build() {
           >
             Add 
           </button>
+           <button
+            onClick={handleDownloadPDF}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
+            Download PDF
+          </button>
         </div>
       </div>
       {/* Message Box */}
@@ -325,6 +381,8 @@ function Build() {
       {/* Norm Group List Section */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Norm Group List</h2>
+
+          
         {/* Edit Success Message */}
         {editMessage && (
           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
@@ -338,6 +396,7 @@ function Build() {
               <th className="border px-4 py-2 text-left">Description</th>
               <th className="border px-4 py-2 text-left">Actions</th>
             </tr>
+           
           </thead>
          <tbody>
   {filteredBuildings.map((normgroup) => (
@@ -397,6 +456,7 @@ function Build() {
   ))}
 </tbody>
         </table>
+        
       </div>
        {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -408,7 +468,9 @@ function Build() {
               <input
                 type="text"
                 value={updatenormgroup?.name || ''}
-                // onChange={(e) => setUpdatenormgroup({ ...updatenormgroup, name: e.target.value })}
+                 onChange={(e) => setUpdatenormgroup({ ...(updatenormgroup ||{ id: 0, name: '', description: '' }), name: e.target.value 
+                })
+              }
                 className="border p-2 rounded w-full"
               />
             </div>
@@ -417,7 +479,12 @@ function Build() {
               <input
                 type="text"
                 value={updatenormgroup?.description || ''}
-                // onChange={(e) => setUpdatenormgroup({ ...updatenormgroup, description: e.target.value })}
+                 onChange={(e) =>
+                setUpdatenormgroup({
+                ...(updatenormgroup || { id: 0, name: '', description: '' }), description: e.target.value,
+                 
+    })
+  }
                 className="border p-2 rounded w-full"
               />
             </div>
@@ -431,7 +498,7 @@ function Build() {
               </button>
               <button
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                onClick={handleSubmit}
+                onClick={handleUpdate}
               >
                 Submit
               </button>

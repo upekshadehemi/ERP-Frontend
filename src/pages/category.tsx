@@ -16,7 +16,7 @@ function Category() {
     useEffect(() => {
       console.log("Categories",Categories );
     }, [Categories]);
-
+ const [showModal, setShowModal] = useState(false);
   const [newcategoryName, setNewcategoryName] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
@@ -25,6 +25,17 @@ function Category() {
   const [editingcategoryId, setEditingcategoryId] = useState<number | null>(null);
   const [editedcategory, setEditedcategory] = useState<category | null>(null);
   const [showMessage, setShowMessage] = useState(false); // State for message box
+  const [updatecategory,setUpdatecategory] =  useState<category | null>(null);
+
+   const handleSubmit = () => {
+    alert("Form submitted!");
+    setShowModal(false);
+  };
+   const showpopup = ( { id:id, name, description }: category) => {
+  
+   setUpdatecategory({ id, name, description });
+   setShowModal(true);
+ };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -204,7 +215,7 @@ function Category() {
             onClick={handleAddItem}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
-            Add Category
+            Add
           </button>
         </div>
       </div>
@@ -230,36 +241,25 @@ function Category() {
           <tbody>
             {filteredCategory.map((category) => (
               <tr key={category.id}>
-                {editingcategoryId === category.id && editedcategory ? (
+                {/* {editingcategoryId === category.id && editedcategory ? ( */}
                   <>
                     <td className="border px-4 py-2">
-                      <input
-                        type="text"
-                        name="name"
-                        value={editedcategory.name}
-                        onChange={handleEditInputChange}
-                        className="border rounded p-1 w-full"
-                      />
-                    </td>
+                     
+                         <label   className="border rounded p-1 w-full">{category.name}</label>
+                        </td> 
                     <td className="border px-4 py-2">
-                      <input
-                        type="text"
-                        name="description"
-                        value={editedcategory.description}
-                        onChange={handleEditInputChange}
-                        className="border rounded p-1 w-full"
-                      />
+                       <label   className="border rounded p-1 w-full">{category.name}</label>
                     </td>
                     <td className="border px-4 py-2">
                       <button
-                        onClick={handleUpdate}
+                       onClick={ () =>showpopup({id:category.id, name:category.name, description:category.description,})}
                         className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
                       >
                         Update
                       </button>
                     </td>
                   </>
-                ) : (
+                {/* ) : (
                   <>
                     <td className="border px-4 py-2">{category.name}</td>
                     <td className="border px-4 py-2">{category.description}</td>
@@ -278,12 +278,62 @@ function Category() {
                       </button>
                     </td>
                   </>
-                )}
+                )
+                }
+                 */}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-80 shadow-xl">
+            <h2 className="text-lg font-semibold mb-4">Popup Title</h2>
+            <p className="mb-6">This is a popup message. Do you want to proceed?</p>
+            <div className="mb-4">
+              <label className="block mb-2">Name:</label>
+              <input
+                type="text"
+                value={updatecategory?.name || ''}
+                 onChange={(e) => setUpdatecategory({ ...(updatecategory ||{ id: 0, name: '', description: '' }), name: e.target.value 
+                })
+              }
+                className="border p-2 rounded w-full"
+              />
+            </div>
+            <div className="mb-4">  
+              <label className="block mb-2">Description:</label>
+              <input
+                type="text"
+                value={updatecategory?.description || ''}
+                 onChange={(e) =>
+                setUpdatecategory({
+                ...(updatecategory || { id: 0, name: '', description: '' }), description: e.target.value,
+                 
+    })
+  }
+                className="border p-2 rounded w-full"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <button
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                onClick={() => setShowModal(false)}
+              >
+                Close
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                onClick={handleSubmit}
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
