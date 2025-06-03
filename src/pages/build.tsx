@@ -31,14 +31,16 @@ function Build() {
   const [editMessage, setEditMessage] = useState(false); //state for edit message box
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false); // State for delete confirmation
   const [buildingToDelete, setBuildingToDelete] = useState<number | null>(null); // Track building to delete
+  const [updatenormgroup, setUpdatenormgroup] = useState<buildings | null>(null); // Track building to update
+  
    const handleSubmit = () => {
     alert("Form submitted!");
     setShowModal(false);
   };
-  const showpopup = () => {
-    
-    setShowModal(true);
-  };
+ const showpopup = () => {
+  showpopup({ id, name, description });
+  setShowModal(true);
+};
 
 
   const handleInputChange = (
@@ -290,7 +292,7 @@ function Build() {
           <input
             type="text"
             name="newbuildName"
-            placeholder="Building Name"
+            placeholder=" Name"
             value={newbuildName}
             onChange={handleInputChange}
             className="border p-2 rounded w-40% md:w-1/3"
@@ -307,7 +309,7 @@ function Build() {
             onClick={handleAddItem}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
-            Add Building
+            Add 
           </button>
         </div>
       </div>
@@ -336,38 +338,39 @@ function Build() {
             </tr>
           </thead>
          <tbody>
-  {filteredBuildings.map((building) => (
-    <tr key={building.id}>
-      {editingBuildingId === building.id && editedBuilding ? (
+  {filteredBuildings.map((normgroup) => (
+    <tr key={normgroup.id}>
+      {/* {editingBuildingId === building.id && editedBuilding ? ( */}
         <>
           <td className="border px-4 py-2">
-            <input
-              type="text"
-              name="name"
-              value={editedBuilding.name}
-              onChange={handleEditInputChange}
-              className="border rounded p-1 w-full"
-            />
+            <label   className="border rounded p-1 w-full"> {normgroup.name}</label>
+              
+             
+              
+             
+            
+           
           </td>
           <td className="border px-4 py-2">
-            <input
-              type="text"
-              name="description"
-              value={editedBuilding.description}
-              onChange={handleEditInputChange}
-              className="border rounded p-1 w-full"
-            />
+            <label className="border rounded p-1 w-full"> {normgroup.description}</label>
+              
+             
+              
+              
+             
+              
+           
           </td>
           <td className="border px-4 py-2">
             <button
-              onClick={handleUpdate}
+              onClick={ () =>showpopup(normgroup.id, normgroup.name, normgroup.description)}
               className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
             >
               Update
             </button>
           </td>
         </>
-      ) : (
+      {/* ) : (
         <>
           <td className="border px-4 py-2">{building.name}</td>
           <td className="border px-4 py-2">{building.description}</td>
@@ -386,7 +389,8 @@ function Build() {
             </button>
           </td>
         </>
-      )}
+      ) */}
+      {/* } */}
     </tr>
   ))}
 </tbody>
