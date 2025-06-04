@@ -1,5 +1,8 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 
 interface norms {
   id: number; // Add an ID for tracking items
@@ -33,6 +36,36 @@ const header = () => {
       const[editMessage,setEditMessage]=useState(false);//state for edit message box
       const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false); // State for delete confirmation
       const [normsToDelete, setnormsToDelete] = useState<number | null>(null); // Track building to delete
+    const handleDownloadPDF = () => {
+      const doc = new jsPDF();
+    
+      // Title
+      doc.setFontSize(16);
+      doc.text("Norms List", 14, 15);
+    
+      // Prepare table rows from filteredBuildings data
+      const rows = filterednorms.map((norm) => [
+        norm.id || "-",
+        norm.title || "-",
+        norm.description || "-",
+        norm.unit || "-",
+        norm.remark || "-",
+        norm.source || "-", 
+      ]);
+    
+      // Insert table with headers
+      autoTable(doc, {
+        head: [["ID", "Title", "Description"," Unit", "Remark", "Source"]],
+        body: rows,
+        startY: 22,
+        theme: "grid",
+        headStyles: { fillColor: [41, 128, 185] }, // optional: blue header
+        styles: { fontSize: 10 },
+      });
+    
+      // Save the PDF
+      doc.save("norm list.pdf");
+    };
     
        const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
           const { name, value } = e.target;
@@ -300,7 +333,13 @@ const handleDelete = (id: number) => {
             onClick={handleAddItem}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
-            Add Building
+            Add
+          </button>
+           <button
+            onClick={handleDownloadPDF}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
+            Download PDF
           </button>
         </div>
       </div>

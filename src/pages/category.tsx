@@ -1,5 +1,7 @@
 import axios from 'axios';
 import React, { useEffect,useState } from 'react';
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface category {
   id: number; // Add an ID for tracking items
@@ -37,6 +39,33 @@ function Category() {
    setShowModal(true);
  };
 
+ const handleDownloadPDF = () => {
+   const doc = new jsPDF();
+ 
+   // Title
+   doc.setFontSize(16);
+   doc.text("Norm Group List", 14, 15);
+ 
+   // Prepare table rows from filteredBuildings data
+   const rows = filteredCategory.map((category) => [
+     category.id || "-",
+     category.name || "-",
+     category.description || "-",
+   ]);
+ 
+   // Insert table with headers
+   autoTable(doc, {
+     head: [["ID", "Name", "Description"]],
+     body: rows,
+     startY: 22,
+     theme: "grid",
+     headStyles: { fillColor: [41, 128, 185] }, // optional: blue header
+     styles: { fontSize: 10 },
+   });
+ 
+   // Save the PDF
+   doc.save("norm-category-list.pdf");
+ };
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     switch (name) {
@@ -217,6 +246,12 @@ function Category() {
           >
             Add
           </button>
+           <button
+            onClick={handleDownloadPDF}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
+            Download PDF
+          </button>
         </div>
       </div>
        {/* Message Box */}
@@ -233,6 +268,7 @@ function Category() {
         <table className="w-full border">
           <thead className="bg-gray-200">
             <tr>
+              {/* <th className="border px-4 py-2 text-left">ID</th> */}
               <th className="border px-4 py-2 text-left">Name</th>
               <th className="border px-4 py-2 text-left">Description</th>
               <th className="border px-4 py-2 text-left">Actions</th>

@@ -334,7 +334,16 @@ const handleUpdate = async ()  => {
             </option>
           ))}
         </select>
-  
+          
+          
+          <input
+            type="number"
+            name="newresourceid"
+            placeholder="resourceid"
+            value={newresourceid}
+            onChange={handleInputChange}
+            className="border p-2 rounded w-full md:w-1/3"
+          />
         <select
           name="newresourcetype"
           value={newresourcetype}
@@ -349,14 +358,6 @@ const handleUpdate = async ()  => {
           ))}
         </select>
 
-          <input
-            type="number"
-            name="newresourceid"
-            placeholder="resourceid"
-            value={newresourceid}
-            onChange={handleInputChange}
-            className="border p-2 rounded w-full md:w-1/3"
-          />
           <input
             type="text"
             name="newunit"
@@ -424,8 +425,9 @@ const handleUpdate = async ()  => {
           <thead className="bg-gray-200">
             <tr>
             
+               <th className="border px-4 py-2 text-left">resourceid</th>
               <th className="border px-4 py-2 text-left">resourcetype</th>
-              <th className="border px-4 py-2 text-left">resourceid</th>
+             
               <th className="border px-4 py-2 text-left">unit</th>
               <th className="border px-4 py-2 text-left">quantity</th>
               <th className="border px-4 py-2 text-left">wastage</th>

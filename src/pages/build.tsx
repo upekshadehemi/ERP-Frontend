@@ -1,12 +1,13 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
+
 
 
 interface buildings {
   id: number; // Add an ID for tracking items
-  //norm_group_id: number; // Add an ID for tracking items
+ // norm_group_id: number; // Add an ID for tracking items
   name: string;
   // group_name: string;
   description: string;
@@ -41,31 +42,40 @@ function Build() {
     setShowModal(false);
   };
 //  const showpopup = ({ id, name, description }:buildings) => {
-  const showpopup = ( { id:id, name, description }: buildings) => {
+  const showpopup = ( { id, name, description }: buildings) => {
   
    setUpdatenormgroup({ id, name, description });
    setShowModal(true);
  };
+
 const handleDownloadPDF = () => {
-    const doc = new jsPDF();
-    doc.text("Norm Group List", 10,10);
+  const doc = new jsPDF();
 
-     // Prepare table rows
-    const rows = filteredBuildings.map((normgroup) => [
-      normgroup.name,
-      normgroup.description,
-    ]);
+  // Title
+  doc.setFontSize(16);
+  doc.text("Norm Group List", 14, 15);
 
+  // Prepare table rows from filteredBuildings data
+  const rows = filteredBuildings.map((normgroup) => [
+    normgroup.id || "-",
+    normgroup.name || "-",
+    normgroup.description || "-",
+  ]);
 
-    // Add table
-    (doc as any).autoTable({
-      head: [["Name", "Description"]],
-      body: rows,
-      startY: 22,
-    });
+  // Insert table with headers
+  autoTable(doc, {
+    head: [["ID", "Name", "Description"]],
+    body: rows,
+    startY: 22,
+    theme: "grid",
+    headStyles: { fillColor: [41, 128, 185] }, // optional: blue header
+    styles: { fontSize: 10 },
+  });
 
-    doc.save("norm-group-list.pdf");
-  };
+  // Save the PDF
+  doc.save("norm-group-list.pdf");
+};
+
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -194,6 +204,7 @@ const handleDownloadPDF = () => {
 
 const handleUpdate = async () => {
   if (updatenormgroup) {
+    console.log("updatenormgroup", updatenormgroup);
     try {
       const response = await axios.put(
         `http://localhost:3000/api/normgroup/update/${updatenormgroup.id}`,
@@ -392,6 +403,7 @@ const handleUpdate = async () => {
         <table className="w-full border">
           <thead className="bg-gray-200">
             <tr>
+              <th className="border px-4 py-2 text-left">ID</th>
               <th className="border px-4 py-2 text-left">Name</th>
               <th className="border px-4 py-2 text-left">Description</th>
               <th className="border px-4 py-2 text-left">Actions</th>
@@ -403,24 +415,14 @@ const handleUpdate = async () => {
     <tr key={normgroup.id}>
       {/* {editingBuildingId === building.id && editedBuilding ? ( */}
         <>
+        <td className="border px-4 py-2">
+            <label   className="border rounded p-1 w-full"> {normgroup.id}</label>
+          </td>
           <td className="border px-4 py-2">
             <label   className="border rounded p-1 w-full"> {normgroup.name}</label>
-              
-             
-              
-             
-            
-           
           </td>
           <td className="border px-4 py-2">
             <label className="border rounded p-1 w-full"> {normgroup.description}</label>
-              
-             
-              
-              
-             
-              
-           
           </td>
           <td className="border px-4 py-2">
             <button
@@ -465,6 +467,16 @@ const handleUpdate = async () => {
             <p className="mb-6">This is a popup message. Do you want to proceed?</p>
             <div className="mb-4">
               <label className="block mb-2">Name:</label>
+              
+               <input
+               hidden
+                type="number"
+                value={updatenormgroup?.id || ''}
+                 onChange={(e) => setUpdatenormgroup({ ...(updatenormgroup ||{ id: 0, name: '', description: '' }), id: e.target.value 
+                })
+              }
+                className="border p-2 rounded w-full"
+              />
               <input
                 type="text"
                 value={updatenormgroup?.name || ''}
